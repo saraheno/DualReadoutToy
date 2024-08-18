@@ -16,7 +16,7 @@ void SCEDraw1 (TCanvas* canv, const char* name, TH1F* h1, const char* outfile, b
 void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
 
 
-int nshowers=10;
+int nshowers=1000;
 double h_s=0.9;
 double h_c=0.7;
 double nscint=1000;
@@ -46,15 +46,23 @@ void DualReadoutToy() {
     CCC=CCC*(1+rrr.Gaus(0.,1/sqrt(ncer)));
     ccc->Fill(CCC);
     sscc->Fill(SSS,CCC);
-    std::cout<<"FFF SSS CCC are "<<FFF<<" "<<SSS<<" "<<CCC<<std::endl;
+    //std::cout<<"FFF SSS CCC are "<<FFF<<" "<<SSS<<" "<<CCC<<std::endl;
 
     double DDD=((1-h_c)*SSS - (1-h_s)*CCC)/(h_s-h_c);
     ddd->Fill(DDD);
-    std::cout<<"DDD is "<<DDD<<std::endl;
+    //std::cout<<"DDD is "<<DDD<<std::endl;
 
 
 
   }
+
+
+  double sigmaS=sss->GetRMS();
+  double sigmaC=ccc->GetRMS();
+  double sigmaD=ddd->GetRMS();
+  std::cout<<"scint res is "<<sigmaS<<std::endl;
+  std::cout<<"cere res is "<<sigmaC<<std::endl;
+  std::cout<<"dual res is "<<sigmaD<<std::endl;
 
 
   TCanvas* c1;
