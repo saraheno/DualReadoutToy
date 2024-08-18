@@ -21,6 +21,8 @@ double h_s=0.9;
 double h_c=0.4;
 double nscint=10000;
 double ncer=10000;
+double fmean=0.5;
+double frms=0.3;
 
 
 void DualReadoutToy() {
@@ -31,19 +33,19 @@ void DualReadoutToy() {
   TH1F *ccc = new TH1F("ccc","shower cherenkov",100,0.,2.0);
   TH2F *sscc = new TH2F("sscc","cheren versus scint", 100,0.,2.0,100,0.,2.0);
   TH1F *ddd = new TH1F("ddd","dual readout",100,0.,2.0);
+  TH1F *cov = new TH1F("cov","covariance",100,0.,2.0);
 
   for (int i=0;i<nshowers;i++) {
     // pick a value for fraction EM in the shower
     double FFF=-1.;
     while((FFF<0)||(FFF>1) ) {
-      FFF = rrr.Gaus(0.5,0.3);
+      FFF = rrr.Gaus(fmean,frms);
     }
     fff->Fill(FFF);
     double SSS=(FFF+h_s*(1-FFF));
     SSS=SSS*(1+rrr.Gaus(0.,1/sqrt(nscint)));
     sss->Fill(SSS);
-    double CCC=(FFF+h_c*(1-FFF));
-    CCC=CCC*(1+rrr.Gaus(0.,1/sqrt(ncer)));
+    double CCC=(FFF+h_c*(1-FFF));    CCC=CCC*(1+rrr.Gaus(0.,1/sqrt(ncer)));
     ccc->Fill(CCC);
     sscc->Fill(SSS,CCC);
     //std::cout<<"FFF SSS CCC are "<<FFF<<" "<<SSS<<" "<<CCC<<std::endl;
@@ -52,7 +54,7 @@ void DualReadoutToy() {
     ddd->Fill(DDD);
     //std::cout<<"DDD is "<<DDD<<std::endl;
 
-
+    cov->Fill((SSS-(fmean-(1-fmean)*h_s))*(CCC-(fmean-(1-fmean)*h_c)));
 
   }
 
@@ -63,6 +65,12 @@ void DualReadoutToy() {
   std::cout<<"scint res is "<<sigmaS<<std::endl;
   std::cout<<"cere res is "<<sigmaC<<std::endl;
   std::cout<<"dual res is "<<sigmaD<<std::endl;
+
+
+  std::cout<<" mean scint is "<<sss->GetMean()<<" while predicted is "<<(fmean-(1-fmean)*h_s)<<std::endl;
+  std::cout<<" mean cer is "<<ccc->GetMean()<<" while predicted is "<<(fmean-(1-fmean)*h_c)<<std::endl;
+
+
 
   double dualpred = (1/(h_s-h_c))*sqrt(
 				       (1-h_c)*(1-h_c)*sigmaS*sigmaS +
@@ -81,6 +89,8 @@ void DualReadoutToy() {
   SCEDraw1_2D(c4,"c4",sscc,"junk4.png");
   TCanvas* c5;
   SCEDraw1(c5,"c5",ddd,"junk5.png",0);
+  TCanvas* c6;
+  SCEDraw1(c6,"c6",cov,"junk6.png",0);
 
 }
 
