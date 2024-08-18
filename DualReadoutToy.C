@@ -18,9 +18,9 @@ void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile
 
 int nshowers=1000;
 double h_s=0.9;
-double h_c=0.7;
-double nscint=1000;
-double ncer=100;
+double h_c=0.4;
+double nscint=10000;
+double ncer=10000;
 
 
 void DualReadoutToy() {
@@ -36,13 +36,13 @@ void DualReadoutToy() {
     // pick a value for fraction EM in the shower
     double FFF=-1.;
     while((FFF<0)||(FFF>1) ) {
-      FFF = rrr.Gaus(0.7,0.3);
+      FFF = rrr.Gaus(0.5,0.3);
     }
     fff->Fill(FFF);
     double SSS=(FFF+h_s*(1-FFF));
     SSS=SSS*(1+rrr.Gaus(0.,1/sqrt(nscint)));
     sss->Fill(SSS);
-    double CCC=(FFF+h_s*(1-FFF));
+    double CCC=(FFF+h_c*(1-FFF));
     CCC=CCC*(1+rrr.Gaus(0.,1/sqrt(ncer)));
     ccc->Fill(CCC);
     sscc->Fill(SSS,CCC);
