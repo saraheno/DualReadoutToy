@@ -67,15 +67,16 @@ void DualReadoutToy() {
   std::cout<<"dual res is "<<sigmaD<<std::endl;
 
 
-  std::cout<<" mean scint is "<<sss->GetMean()<<" while predicted is "<<(fmean-(1-fmean)*h_s)<<std::endl;
-  std::cout<<" mean cer is "<<ccc->GetMean()<<" while predicted is "<<(fmean-(1-fmean)*h_c)<<std::endl;
+  std::cout<<" mean scint is "<<sss->GetMean()<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
+  std::cout<<" mean cer is "<<ccc->GetMean()<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
+  std::cout<<" mean cov is "<<cov->GetMean()<<" while predicted is "<<(1-h_c)*(1-h_s)<<std::endl;
 
 
 
   double dualpred = (1/(h_s-h_c))*sqrt(
 				       (1-h_c)*(1-h_c)*sigmaS*sigmaS +
 				       (1-h_s)*(1-h_s)*sigmaC*sigmaC -
-				       2*(1-h_s)*(1-h_c)*(1+h_s)*(1+h_c)
+				       2*(1-h_s)*(1-h_s)*(1-h_c)*(1-h_c)
 );
   std::cout<<"predicted dual resolution "<<dualpred<<std::endl;
 
