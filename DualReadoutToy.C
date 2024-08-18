@@ -35,9 +35,12 @@ void DualReadoutToy() {
   TH1F *ddd = new TH1F("ddd","dual readout",100,0.,2.0);
   TH1F *cov = new TH1F("cov","covariance",100,0.,2.0);
 
+
+  double acov=0.;
   for (int i=0;i<nshowers;i++) {
     // pick a value for fraction EM in the shower
     double FFF=-1.;
+ 
     while((FFF<0)||(FFF>1) ) {
       FFF = rrr.Gaus(fmean,frms);
     }
@@ -55,8 +58,10 @@ void DualReadoutToy() {
     //std::cout<<"DDD is "<<DDD<<std::endl;
 
     cov->Fill((SSS-(fmean-(1-fmean)*h_s))*(CCC-(fmean-(1-fmean)*h_c)));
-
+    acov+=(SSS-(fmean-(1-fmean)*h_s))*(CCC-(fmean-(1-fmean)*h_c));
   }
+  acov=acov/(nshowers-1);
+  std::cout<<"acov is "<<acov<<" mean of cov is "<<cov->GetMean()<<" rms of cov is "<<cov->GetRMS()<<std::endl;
 
 
   double sigmaS=sss->GetRMS();
@@ -76,7 +81,7 @@ void DualReadoutToy() {
   double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
   double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
   double sum12= term1+term2;
-  double term3= 2*(1-h_s)*(1-h_s)*covmean;
+  double term3= 2*(1-h_s)*(1-h_s)*acov;
   std::cout<<"1 2 sum 3 are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3<<std::endl;
  
   double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3);
