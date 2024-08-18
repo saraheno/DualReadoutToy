@@ -81,7 +81,7 @@ void DualReadoutToy() {
   double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
   double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
   double sum12= term1+term2;
-  double term3= 2*(1-h_s)*(1-h_s)*acov;
+  double term3= 2*(1-h_s)*(1-h_c)*acov;
   std::cout<<"1 2 sum 3 are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3<<std::endl;
  
   double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3);
