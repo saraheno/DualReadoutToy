@@ -18,7 +18,7 @@ void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile
 
 int nshowers=1000;
 double h_s=0.9;
-double h_c=0.4;
+double h_c=0.6;
 double nscint=10000;
 double ncer=10000;
 double fmean=0.5;
@@ -74,7 +74,7 @@ void DualReadoutToy() {
 
   std::cout<<" mean scint is "<<sss->GetMean()<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
   std::cout<<" mean cer is "<<ccc->GetMean()<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
-  std::cout<<" mean cov is "<<cov->GetMean()<<" while predicted is "<<(1-h_c)*(1-h_s)<<std::endl;
+  std::cout<<" mean cov is "<<cov->GetMean()<<" while predicted is "<<h_c*(1-h_s)+h_s*(1-h_c)+(1/sqrt(2))*(1-h_s)*(1-h_c)<<std::endl;
   double covmean = cov->GetMean();
 
 
