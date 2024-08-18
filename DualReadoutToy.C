@@ -26,11 +26,11 @@ double ncer=100;
 void DualReadoutToy() {
 
   TRandom rrr;
-  TH1F *fff = new TH1F("fff","shower em fraction",100,0.,1.1);
-  TH1F *sss = new TH1F("sss","shower scintillation",100,0.,1.1);
-  TH1F *ccc = new TH1F("ccc","shower cherenkov",100,0.,1.1);
-  TH2F *sscc = new TH2F("sscc","cheren versus scint", 100,0.,1.1,100,0.,1.1);
-  TH1F *ddd = new TH1F("ddd","dual readout",100,0.,1.1);
+  TH1F *fff = new TH1F("fff","shower em fraction",100,0.,2.0);
+  TH1F *sss = new TH1F("sss","shower scintillation",100,0.,2.0);
+  TH1F *ccc = new TH1F("ccc","shower cherenkov",100,0.,2.0);
+  TH2F *sscc = new TH2F("sscc","cheren versus scint", 100,0.,2.0,100,0.,2.0);
+  TH1F *ddd = new TH1F("ddd","dual readout",100,0.,2.0);
 
   for (int i=0;i<nshowers;i++) {
     // pick a value for fraction EM in the shower
