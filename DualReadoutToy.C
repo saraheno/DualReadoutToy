@@ -19,10 +19,10 @@ void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile
 int nshowers=10000;
 double h_s=0.9;
 double h_c=0.3;
-double nscint=10;
-double ncer=10;
+double nscint=100;
+double ncer=100;
 double fmean=0.5;
-double frms=0.03;
+double frms=0.3;
 
 
 void DualReadoutToy() {
