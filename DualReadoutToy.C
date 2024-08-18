@@ -16,24 +16,24 @@ void SCEDraw1 (TCanvas* canv, const char* name, TH1F* h1, const char* outfile, b
 void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
 
 
-int nshowers=1000;
+int nshowers=10000;
 double h_s=0.9;
 double h_c=0.6;
-double nscint=10000;
-double ncer=10000;
+double nscint=10;
+double ncer=10;
 double fmean=0.5;
-double frms=0.3;
+double frms=0.03;
 
 
 void DualReadoutToy() {
 
   TRandom rrr;
-  TH1F *fff = new TH1F("fff","shower em fraction",100,0.,2.0);
-  TH1F *sss = new TH1F("sss","shower scintillation",100,0.,2.0);
-  TH1F *ccc = new TH1F("ccc","shower cherenkov",100,0.,2.0);
-  TH2F *sscc = new TH2F("sscc","cheren versus scint", 100,0.,2.0,100,0.,2.0);
-  TH1F *ddd = new TH1F("ddd","dual readout",100,0.,2.0);
-  TH1F *cov = new TH1F("cov","covariance",100,0.,2.0);
+  TH1F *fff = new TH1F("fff","shower em fraction",300,0.,2.0);
+  TH1F *sss = new TH1F("sss","shower scintillation",300,0.,2.0);
+  TH1F *ccc = new TH1F("ccc","shower cherenkov",300,0.,2.0);
+  TH2F *sscc = new TH2F("sscc","cheren versus scint", 1000,0.,2.0,1000,0.,2.0);
+  TH1F *ddd = new TH1F("ddd","dual readout",300,0.,2.0);
+  TH1F *cov = new TH1F("cov","covariance",300,0.,2.0);
 
 
   double acov=0.;
@@ -74,8 +74,12 @@ void DualReadoutToy() {
 
   std::cout<<" mean scint is "<<sss->GetMean()<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
   std::cout<<" mean cer is "<<ccc->GetMean()<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
-  std::cout<<" mean cov is "<<cov->GetMean()<<" while predicted is "<<h_c*(1-h_s)+h_s*(1-h_c)+(1/sqrt(2))*(1-h_s)*(1-h_c)<<std::endl;
   double covmean = cov->GetMean();
+  int iii=cov->GetMaximumBin();
+  covmean=cov->GetBinCenter(iii);
+  double precov=h_c*(1-h_s)+h_s*(1-h_c)+(1/sqrt(2))*(1-h_s)*(1-h_c);
+  std::cout<<" mean cov is "<<covmean<<" while predicted is "<<precov<<std::endl;
+  std::cout<<"ratio is "<<covmean/precov<<std::endl;
 
 
   double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
