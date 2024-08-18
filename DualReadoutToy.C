@@ -73,10 +73,14 @@ void DualReadoutToy() {
   double covmean = cov->GetMean();
 
 
-  double dualpred = (1/(h_s-h_c))*sqrt(
-				       (1-h_c)*(1-h_c)*sigmaS*sigmaS +
-				       (1-h_s)*(1-h_s)*sigmaC*sigmaC -
-				       2*(1-h_s)*(1-h_s)*covmean);
+  double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
+  double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
+  double sum12= term1+term2;
+  double term3= 2*(1-h_s)*(1-h_s)*covmean;
+  std::cout<<"1 2 sum 3 are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3<<std::endl;
+ 
+  double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3);
+
 
   std::cout<<"predicted dual resolution "<<dualpred<<std::endl;
 
