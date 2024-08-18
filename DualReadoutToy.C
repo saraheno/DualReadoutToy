@@ -64,6 +64,12 @@ void DualReadoutToy() {
   std::cout<<"cere res is "<<sigmaC<<std::endl;
   std::cout<<"dual res is "<<sigmaD<<std::endl;
 
+  double dualpred = (1/(h_s-h_c))*sqrt(
+				       (1-h_c)*(1-h_c)*sigmaS*sigmaS +
+				       (1-h_s)*(1-h_s)*sigmaC*sigmaC -
+				       2*(1-h_s)*(1-h_c)*(1+h_s)*(1+h_c)
+);
+  std::cout<<"predicted dual resolution "<<dualpred<<std::endl;
 
   TCanvas* c1;
   SCEDraw1(c1,"c1",fff,"junk1.png",0);
