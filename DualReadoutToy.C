@@ -61,7 +61,7 @@ void DualReadoutToy() {
     //std::cout<<"DDD is "<<DDD<<std::endl;
 
     cov->Fill((SSS-pmeans)*(CCC-(fmean-pmeanc)));
-    acov+=(SSS-(fmean-(1-fmean)*h_s))*(CCC-(fmean-(1-fmean)*h_c));
+    acov+=(SSS-pmeans)*(CCC-pmeanc);
   }
   acov=acov/(nshowers-1);
   std::cout<<"acov is "<<acov<<" mean of cov is "<<cov->GetMean()<<" rms of cov is "<<cov->GetRMS()<<std::endl;
