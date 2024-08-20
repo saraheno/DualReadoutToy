@@ -1,3 +1,5 @@
+
+
 // force update
 #include "TROOT.h"
 #include "TFile.h"
@@ -29,8 +31,8 @@ void DualReadoutToy() {
   double h_c=0.3;
   double nscint=10000;
   double ncer=10000;
-  double fmean=0.5;
-  double frms=0.3;
+  double fmean=0.8;
+  double frms=0.2;
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
 
   dotoy(1,h_s,h_c,nscint,ncer,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
@@ -38,15 +40,15 @@ void DualReadoutToy() {
   std::cout<<"mean cer is "<<cccm<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
   std::cout<<"scint res is "<<sigmaS<<std::endl;
   std::cout<<"cere res is "<<sigmaC<<std::endl;
-  double HHH=(1-h_s)*(1-h_c);
-  double precov=HHH*frms*frms;
+  //  double precov=(1-h_s)*(1-h_c)*frms*frms;
+  double precov=(1-h_s)*(1-h_c)*(frms*frms*fmean*fmean/(frms*frms+fmean*fmean));
   std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
   double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
   double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
   double sum12= term1+term2;
   double term3_true= 2*(1-h_s)*(1-h_c)*acov;
   double term3_formula= 2*(1-h_s)*(1-h_c)*precov;
-  std::cout<<"1 2 sum 3_true are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3_true<<std::endl;
+  std::cout<<"1 2 sum 3_true 3_for are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3_true<<" "<<term3_formula<<std::endl;
 
   double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3_true);
   double dualpred2 = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
@@ -55,30 +57,33 @@ void DualReadoutToy() {
 
   
   TH2F *covcheck = new TH2F("covcheck","covcheck", 1000,0.,0.02,1000,0.,0.02);
-  TH2F *dualcheck = new TH2F("dualcheck true","dualcheck", 1000,0.,0.1,1000,0.,0.1);
-  TH2F *dualcheckf = new TH2F("dualcheck formula","dualcheckf", 1000,0.,0.1,1000,0.,0.1);
+  TH2F *dualcheck = new TH2F("dualcheck true","dualcheck", 1000,0.,0.05,1000,0.,0.05);
+  TH2F *dualcheckf = new TH2F("dualcheck formula","dualcheckf", 1000,0.,0.05,1000,0.,0.05);
+  TH2F *dualcheckab = new TH2F("dualcheck formulaab","dualcheckab", 1000,0.,0.05,1000,0.,0.05);
   TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.1,1000,0.,0.1);
   for(int j=1;j<20;j++) {
     double frestry=(1/40.)*j;
     //    std::cout<<std::endl;
     dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
-    double HHH=(1-h_s)*(1-h_c);
-    double precov=HHH*frestry*frestry; 
+    //precov=(1-h_s)*(1-h_c)*frestry*frestry; 
+    precov=(1-h_s)*(1-h_c)*(frestry*frestry*fmean*fmean/(frestry*frestry+fmean*fmean));
     covcheck->Fill(acov,precov);
     //    std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
 
-    double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
-    double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
-    double term3_true= 2*(1-h_s)*(1-h_c)*acov;
-    double term3_formula= 2*(1-h_s)*(1-h_c)*precov;
+    term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
+    term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
+    term3_true= 2*(1-h_s)*(1-h_c)*acov;
+    term3_formula= 2*(1-h_s)*(1-h_c)*precov;
     double dualpreda = (1/(h_s-h_c))*sqrt(term1+term2-term3_true);
     double dualpredb = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
     dualcheck->Fill(sigmaD,dualpreda);
     dualcheckf->Fill(sigmaD,dualpredb);
+    dualcheckab->Fill(dualpreda,dualpredb);
     //    std::cout<<"sigma D and pre "<<sigmaD<<" "<<dualpreda<<std::endl;
     scintdual->Fill(sigmaS,sigmaD);
 
   }
+  std::cout<<"ult cov is "<<acov<<std::endl;
 
   TCanvas* c7;
   SCEDraw1_2D(c7,"c7",covcheck,"junk7.png");
@@ -86,20 +91,35 @@ void DualReadoutToy() {
   SCEDraw1_2D(c8,"c8",dualcheck,"junk8.png");
   TCanvas* c9;
   SCEDraw1_2D(c9,"c9",dualcheckf,"junk9.png");
+  TCanvas* c91;
+  SCEDraw1_2D(c91,"c91",dualcheckab,"junk9a.png");
   TCanvas* c10;
   SCEDraw1_2D_2(c10,"c10",scintdual,"junk10.png");
 
 
   TH2F *scintdual2 = new TH2F("scint2 res vs dual res","scintdual2", 1000,0.,0.1,1000,0.,0.1);
+  TH2F *dualcheckha = new TH2F("dual true v p ha","dualcheckha", 1000,0.,0.1,1000,0.,0.1);
   for(int j=1;j<500;j++) {
     double nnn=100.*j;
 
     dotoy(0,h_s,h_c,nnn,nnn,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
     scintdual2->Fill(sigmaS,sigmaD);
 
+    precov=(1-h_s)*(1-h_c)*(frms*frms*fmean*fmean/(frms*frms+fmean*fmean));
+    term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
+    term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
+    term3_true= 2*(1-h_s)*(1-h_c)*acov;
+    term3_formula= 2*(1-h_s)*(1-h_c)*precov;
+    double dualpreda = (1/(h_s-h_c))*sqrt(term1+term2-term3_true);
+    double dualpredb = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
+    dualcheckha->Fill(dualpreda,dualpredb);
+
   }
+  std::cout<<"last dualres is "<<sigmaD<<std::endl;
   TCanvas* c11;
   SCEDraw1_2D_2(c11,"c11",scintdual2,"junk11.png");
+  TCanvas* c11a;
+  SCEDraw1_2D_2(c11a,"c11a",dualcheckha,"junk11a.png");
 
 
 
@@ -114,6 +134,10 @@ void DualReadoutToy() {
   TCanvas* c12;
   SCEDraw1_2D(c12,"c12",scintdual3,"junk12.png");
 
+  int ijunk=0;
+  std::cout<<"input an integer"<<std::endl;
+  std::cin>>ijunk;
+
   
 }
 
@@ -125,7 +149,7 @@ void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double f
   TH1F *ccc = new TH1F("ccc","shower cherenkov",300,0.,2.0);
   TH2F *sscc = new TH2F("sscc","cheren versus scint", 1000,0.,2.0,1000,0.,2.0);
   TH1F *ddd = new TH1F("ddd","dual readout",900,0.,2.0);
-  TH1F *cov = new TH1F("cov","covariance",300,-2.,2.0);
+  TH1F *cov = new TH1F("cov","covariance",3000,-2.,2.0);
   fff->Reset();
   sss->Reset();
   ccc->Reset();
