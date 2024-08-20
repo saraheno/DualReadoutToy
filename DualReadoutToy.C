@@ -14,87 +14,46 @@
 
 void SCEDraw1 (TCanvas* canv, const char* name, TH1F* h1, const char* outfile, bool logy);
 void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
-
+void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, TH1F* fff, TH1F* sss, TH1F* ccc, TH2F* sscc, TH1F* ddd, TH1F* cov,double &sssm,double &cccm,double &sigmaS, double &sigmaC, double &sigmaD, double &acov);
 
 int nshowers=10000;
-double h_s=0.9;
-double h_c=0.3;
-double nscint=1000;
-double ncer=1000;
-double fmean=0.5;
-double frms=0.2;
-double HHH=(1-h_s)*(1-h_c);
+
+
+TRandom rrr;
+
 
 void DualReadoutToy() {
-
-  TRandom rrr;
   TH1F *fff = new TH1F("fff","shower em fraction",300,0.,2.0);
   TH1F *sss = new TH1F("sss","shower scintillation",300,0.,2.0);
   TH1F *ccc = new TH1F("ccc","shower cherenkov",300,0.,2.0);
   TH2F *sscc = new TH2F("sscc","cheren versus scint", 1000,0.,2.0,1000,0.,2.0);
   TH1F *ddd = new TH1F("ddd","dual readout",300,0.,2.0);
   TH1F *cov = new TH1F("cov","covariance",300,-2.,2.0);
+  double h_s=0.9;
+  double h_c=0.3;
+  double nscint=1000;
+  double ncer=1000;
+  double fmean=0.5;
+  double frms=0.2;
+  bool doplot=1;
+  double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
 
-
-  double acov=0.;
-  double pmeans=(fmean+(1-fmean)*h_s);
-  double pmeanc=(fmean+(1-fmean)*h_c);
-  for (int i=0;i<nshowers;i++) {
-    // pick a value for fraction EM in the shower
-    double FFF=-1.;
- 
-    while((FFF<0)||(FFF>1) ) {
-      FFF = rrr.Gaus(fmean,frms);
-    }
-    fff->Fill(FFF);
-    double SSS=(FFF+h_s*(1-FFF));
-    SSS=SSS*(1+rrr.Gaus(0.,1/sqrt(nscint)));
-    sss->Fill(SSS);
-    double CCC=(FFF+h_c*(1-FFF));    
-    CCC=CCC*(1+rrr.Gaus(0.,1/sqrt(ncer)));
-    ccc->Fill(CCC);
-    sscc->Fill(SSS,CCC);
-    //std::cout<<"FFF SSS CCC are "<<FFF<<" "<<SSS<<" "<<CCC<<std::endl;
-
-    double DDD=((1-h_c)*SSS - (1-h_s)*CCC)/(h_s-h_c);
-    ddd->Fill(DDD);
-    //std::cout<<"DDD is "<<DDD<<std::endl;
-
-    cov->Fill((SSS-pmeans)*(CCC-(fmean-pmeanc)));
-    acov+=(SSS-pmeans)*(CCC-pmeanc);
-  }
-  acov=acov/(nshowers-1);
-  std::cout<<"acov is "<<acov<<" mean of cov is "<<cov->GetMean()<<" rms of cov is "<<cov->GetRMS()<<std::endl;
-
-
-  double sigmaS=sss->GetRMS();
-  double sigmaC=ccc->GetRMS();
-  double sigmaD=ddd->GetRMS();
+  dotoy(doplot,h_s,h_c,nscint,ncer,fmean,frms,fff,sss,ccc,sscc,ddd,cov,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
+  std::cout<<" mean scint is "<<sssm<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
+  std::cout<<" mean cer is "<<cccm<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
   std::cout<<"scint res is "<<sigmaS<<std::endl;
   std::cout<<"cere res is "<<sigmaC<<std::endl;
-  std::cout<<"dual res is "<<sigmaD<<std::endl;
-
-
-  std::cout<<" mean scint is "<<sss->GetMean()<<" while predicted is "<<pmeans<<std::endl;
-  std::cout<<" mean cer is "<<ccc->GetMean()<<" while predicted is "<<pmeanc<<std::endl;
-  double covmean = cov->GetMean();
-  //int iii=cov->GetMaximumBin();
-  //double covmean=cov->GetBinCenter(iii);
-  double precov=HHH*frms*frms;
-  std::cout<<" cov is "<<acov<<" while predicted is "<<precov<<std::endl;
-  std::cout<<"ratio is "<<acov/precov<<std::endl;
-
-
+  double HHH=(1-h_s)*(1-h_c);
+  double precov=(1-h_c)*(1-h_c)*frms*frms;
+  std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
   double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
   double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
   double sum12= term1+term2;
   double term3= 2*(1-h_s)*(1-h_c)*acov;
   std::cout<<"1 2 sum 3 are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3<<std::endl;
- 
+
   double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3);
-
-
-  std::cout<<"predicted dual resolution "<<dualpred<<std::endl;
+  std::cout<<"dual res is "<<sigmaD<<" while predicted is "<<dualpred<<std::endl;
 
   TCanvas* c1;
   SCEDraw1(c1,"c1",fff,"junk1.png",0);
@@ -109,6 +68,53 @@ void DualReadoutToy() {
   TCanvas* c6;
   SCEDraw1(c6,"c6",cov,"junk6.png",0);
 
+}
+
+
+void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, TH1F* fff, TH1F* sss, TH1F* ccc, TH2F* sscc, TH1F* ddd, TH1F* cov,double &sssm, double& cccm, double &sigmaS, double &sigmaC, double &sigmaD, double &acov) {
+
+
+  double HHH=(1-h_s)*(1-h_c);
+  acov=0.;
+  double pmeans=(fmean+(1-fmean)*h_s);
+  double pmeanc=(fmean+(1-fmean)*h_c);
+  for (int i=0;i<nshowers;i++) {
+    // pick a value for fraction EM in the shower
+    double FFF=-1.;
+     while((FFF<0)||(FFF>1) ) {
+      FFF = rrr.Gaus(fmean,frms);
+    }
+    fff->Fill(FFF);
+    double SSS=(FFF+h_s*(1-FFF));
+    SSS=SSS*(1+rrr.Gaus(0.,1/sqrt(nscint)));
+    sss->Fill(SSS);
+    double CCC=(FFF+h_c*(1-FFF));    
+    CCC=CCC*(1+rrr.Gaus(0.,1/sqrt(ncer)));
+    ccc->Fill(CCC);
+    sscc->Fill(SSS,CCC);
+
+    double DDD=((1-h_c)*SSS - (1-h_s)*CCC)/(h_s-h_c);
+    ddd->Fill(DDD);
+
+    cov->Fill((SSS-pmeans)*(CCC-(fmean-pmeanc)));
+    acov+=(SSS-pmeans)*(CCC-pmeanc);
+  }
+  acov=acov/(nshowers-1);
+
+  sigmaS=sss->GetRMS();
+  sigmaC=ccc->GetRMS();
+  sigmaD=ddd->GetRMS();
+  sssm=sss->GetMean();
+  cccm=ccc->GetMean();
+
+
+  //double covmean = cov->GetMean();
+  //int iii=cov->GetMaximumBin();
+  //double covmean=cov->GetBinCenter(iii);
+ 
+ 
+
+  return;
 }
 
 
