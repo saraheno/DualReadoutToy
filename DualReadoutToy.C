@@ -19,7 +19,7 @@ void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile
 void SCEDraw1_2D_2 (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
 void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm,double &cccm,double &sigmaS, double &sigmaC, double &sigmaD, double &acov);
 
-int nshowers=10000;
+int nshowers=100000;
 
 
 TRandom rrr;
@@ -28,7 +28,7 @@ TRandom rrr;
 void DualReadoutToy() {
 
   double h_s=0.9;
-  double h_c=0.5;
+  double h_c=0.6;
   double nscint=10000;
   double ncer=10000;
   double fmean=0.6;
