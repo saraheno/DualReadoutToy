@@ -39,21 +39,37 @@ void DualReadoutToy() {
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
 
   dotoy(doplot,h_s,h_c,nscint,ncer,fmean,frms,fff,sss,ccc,sscc,ddd,cov,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
-  std::cout<<" mean scint is "<<sssm<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
-  std::cout<<" mean cer is "<<cccm<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
+  std::cout<<"mean scint is "<<sssm<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
+  std::cout<<"mean cer is "<<cccm<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
   std::cout<<"scint res is "<<sigmaS<<std::endl;
   std::cout<<"cere res is "<<sigmaC<<std::endl;
   double HHH=(1-h_s)*(1-h_c);
-  double precov=(1-h_c)*(1-h_c)*frms*frms;
+  double precov=HHH*frms*frms;
   std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
   double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
   double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
   double sum12= term1+term2;
-  double term3= 2*(1-h_s)*(1-h_c)*acov;
-  std::cout<<"1 2 sum 3 are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3<<std::endl;
+  double term3_true= 2*(1-h_s)*(1-h_c)*acov;
+  double term3_formula= 2*(1-h_s)*(1-h_c)*precov;
+  std::cout<<"1 2 sum 3_true are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3_true<<std::endl;
 
-  double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3);
-  std::cout<<"dual res is "<<sigmaD<<" while predicted is "<<dualpred<<std::endl;
+  double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3_true);
+  double dualpred2 = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
+  std::cout<<"dual res is "<<sigmaD<<" predicted using true cov is  "<<dualpred<<" predicted using formula cov is "<<dualpred2<<std::endl;
+
+
+
+  TH2F *covcheck = new TH2F("covcheck","covcheck", 1000,0.,0.01,1000,0.,0.01);
+  doplot=0;
+  for(int j=1;j<100;j++) {
+    double frestry=(1/100.)*j;
+    dotoy(doplot,h_s,h_c,nscint,ncer,fmean,frestry,fff,sss,ccc,sscc,ddd,cov,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
+  double HHH=(1-h_s)*(1-h_c);
+  double precov=HHH*frestry*frestry; 
+  covcheck->Fill(acov,precov);
+  std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
+  }
+
 
   TCanvas* c1;
   SCEDraw1(c1,"c1",fff,"junk1.png",0);
@@ -67,6 +83,8 @@ void DualReadoutToy() {
   SCEDraw1(c5,"c5",ddd,"junk5.png",0);
   TCanvas* c6;
   SCEDraw1(c6,"c6",cov,"junk6.png",0);
+  TCanvas* c7;
+  SCEDraw1_2D(c7,"c7",covcheck,"junk7.png");
 
 }
 
@@ -81,22 +99,22 @@ void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fm
   for (int i=0;i<nshowers;i++) {
     // pick a value for fraction EM in the shower
     double FFF=-1.;
-     while((FFF<0)||(FFF>1) ) {
+    while((FFF<0)||(FFF>1) ) {
       FFF = rrr.Gaus(fmean,frms);
     }
-    fff->Fill(FFF);
+    if(doplot) fff->Fill(FFF);
     double SSS=(FFF+h_s*(1-FFF));
     SSS=SSS*(1+rrr.Gaus(0.,1/sqrt(nscint)));
-    sss->Fill(SSS);
+    if(doplot) sss->Fill(SSS);
     double CCC=(FFF+h_c*(1-FFF));    
     CCC=CCC*(1+rrr.Gaus(0.,1/sqrt(ncer)));
-    ccc->Fill(CCC);
-    sscc->Fill(SSS,CCC);
+    if(doplot) ccc->Fill(CCC);
+    if(doplot) sscc->Fill(SSS,CCC);
 
     double DDD=((1-h_c)*SSS - (1-h_s)*CCC)/(h_s-h_c);
-    ddd->Fill(DDD);
+    if(doplot) ddd->Fill(DDD);
 
-    cov->Fill((SSS-pmeans)*(CCC-(fmean-pmeanc)));
+    if(doplot) cov->Fill((SSS-pmeans)*(CCC-(fmean-pmeanc)));
     acov+=(SSS-pmeans)*(CCC-pmeanc);
   }
   acov=acov/(nshowers-1);
