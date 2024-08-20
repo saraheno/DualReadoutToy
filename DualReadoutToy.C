@@ -40,8 +40,8 @@ void DualReadoutToy() {
   std::cout<<"mean cer is "<<cccm<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
   std::cout<<"scint res is "<<sigmaS<<std::endl;
   std::cout<<"cere res is "<<sigmaC<<std::endl;
-  //  double precov=(1-h_s)*(1-h_c)*frms*frms;
-  double precov=(1-h_s)*(1-h_c)*(frms*frms*fmean*fmean/(frms*frms+fmean*fmean));
+  double precov=(1-h_s)*(1-h_c)*frms*frms;
+  //double precov=(1-h_s)*(1-h_c)*(frms*frms*fmean*fmean/(frms*frms+fmean*fmean));
   std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
   double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
   double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
@@ -57,42 +57,57 @@ void DualReadoutToy() {
 
   
   TH2F *covcheck = new TH2F("covcheck","covcheck", 1000,0.,0.02,1000,0.,0.02);
-  TH2F *dualcheck = new TH2F("dualcheck true","dualcheck", 1000,0.,0.05,1000,0.,0.05);
-  TH2F *dualcheckf = new TH2F("dualcheck formula","dualcheckf", 1000,0.,0.05,1000,0.,0.05);
-  TH2F *dualcheckab = new TH2F("dualcheck formulaab","dualcheckab", 1000,0.,0.05,1000,0.,0.05);
+  TH2F *covcheckf1 = new TH2F("true-pred vs f","covcheckf1", 1000,0.,0.6,1000,-0.01,0.05);
+  TH1F *dualcheck = new TH1F("dualcheck true","dualcheck", 1000,-0.05,0.05);
+  TH1F *dualcheckf = new TH1F("dualcheck formula","dualcheckf", 1000,-0.05,0.05);
+  TH1F *dualcheckab = new TH1F("dualcheck formulaab","dualcheckab", 1000,-0.05,0.05);
   TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.1,1000,0.,0.1);
-  for(int j=1;j<20;j++) {
-    double frestry=(1/40.)*j;
+  int jmax=0;
+
+  int npts=20;
+  double range=min(fmean,1-fmean)/2.;
+  for(int j=1;j<npts;j++) {
+    double frestry=j*(range/npts);
+    std::cout<<"frestry is "<<frestry<<std::endl;
     //    std::cout<<std::endl;
     dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
-    //precov=(1-h_s)*(1-h_c)*frestry*frestry; 
-    precov=(1-h_s)*(1-h_c)*(frestry*frestry*fmean*fmean/(frestry*frestry+fmean*fmean));
+
+    //precov=(1-h_s)*(1-h_c)*(frestry*frestry*fmean*fmean/(frestry*frestry+fmean*fmean));
     covcheck->Fill(acov,precov);
+    precov=(1-h_s)*(1-h_c)*frestry*frestry; 
     //    std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
 
     term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
     term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
     term3_true= 2*(1-h_s)*(1-h_c)*acov;
     term3_formula= 2*(1-h_s)*(1-h_c)*precov;
+
+    if(term3_formula>term1+term2) {
+      std::cout<<"invalid prediction frestry="<<frestry<<std::endl;
+      jmax=j-1;
+    }
+    if(jmax!=0) term3_formula= 2*(1-h_s)*(1-h_c)*(1-h_s)*(1-h_c)*(1./40.)*(1./40.)*jmax*jmax;
     double dualpreda = (1/(h_s-h_c))*sqrt(term1+term2-term3_true);
     double dualpredb = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
-    dualcheck->Fill(sigmaD,dualpreda);
-    dualcheckf->Fill(sigmaD,dualpredb);
-    dualcheckab->Fill(dualpreda,dualpredb);
+    dualcheck->Fill(sigmaD-dualpreda);
+    dualcheckf->Fill(sigmaD-dualpredb);
+    dualcheckab->Fill(dualpreda-dualpredb);
     //    std::cout<<"sigma D and pre "<<sigmaD<<" "<<dualpreda<<std::endl;
     scintdual->Fill(sigmaS,sigmaD);
-
+    covcheckf1->Fill(frestry,sigmaD-dualpredb);
   }
   std::cout<<"ult cov is "<<acov<<std::endl;
 
   TCanvas* c7;
   SCEDraw1_2D(c7,"c7",covcheck,"junk7.png");
+  TCanvas* c7a;
+  SCEDraw1_2D(c7a,"c7a",covcheckf1,"junk7a.png");
   TCanvas* c8;
-  SCEDraw1_2D(c8,"c8",dualcheck,"junk8.png");
+  SCEDraw1(c8,"c8",dualcheck,"junk8.png",0);
   TCanvas* c9;
-  SCEDraw1_2D(c9,"c9",dualcheckf,"junk9.png");
+  SCEDraw1(c9,"c9",dualcheckf,"junk9.png",0);
   TCanvas* c91;
-  SCEDraw1_2D(c91,"c91",dualcheckab,"junk9a.png");
+  SCEDraw1(c91,"c91",dualcheckab,"junk9a.png",0);
   TCanvas* c10;
   SCEDraw1_2D_2(c10,"c10",scintdual,"junk10.png");
 
