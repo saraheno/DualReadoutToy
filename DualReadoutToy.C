@@ -60,6 +60,7 @@ void DualReadoutToy() {
 
 
   TH2F *covcheck = new TH2F("covcheck","covcheck", 1000,0.,0.01,1000,0.,0.01);
+  TH2F *dualcheck = new TH2F("dualcheck","dualcheck", 1000,0.,0.01,1000,0.,0.01);
   doplot=0;
   for(int j=1;j<100;j++) {
     double frestry=(1/100.)*j;
@@ -67,7 +68,16 @@ void DualReadoutToy() {
   double HHH=(1-h_s)*(1-h_c);
   double precov=HHH*frestry*frestry; 
   covcheck->Fill(acov,precov);
-  std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
+
+
+  double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
+  double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
+  double term3_formula= 2*(1-h_s)*(1-h_c)*precov;
+  double dualpreda = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
+  dualcheck->Fill(sigmaD,dualpreda);
+  //  std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
+
+
   }
 
 
@@ -85,6 +95,8 @@ void DualReadoutToy() {
   SCEDraw1(c6,"c6",cov,"junk6.png",0);
   TCanvas* c7;
   SCEDraw1_2D(c7,"c7",covcheck,"junk7.png");
+  TCanvas* c8;
+  SCEDraw1_2D(c8,"c8",dualcheck,"junk8.png");
 
 }
 
