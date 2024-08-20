@@ -60,12 +60,12 @@ void DualReadoutToy() {
   TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.1,1000,0.,0.1);
   for(int j=1;j<20;j++) {
     double frestry=(1/40.)*j;
-    std::cout<<std::endl;
+    //    std::cout<<std::endl;
     dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
     double HHH=(1-h_s)*(1-h_c);
     double precov=HHH*frestry*frestry; 
     covcheck->Fill(acov,precov);
-    std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
+    //    std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
 
     double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
     double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
@@ -75,7 +75,7 @@ void DualReadoutToy() {
     double dualpredb = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
     dualcheck->Fill(sigmaD,dualpreda);
     dualcheckf->Fill(sigmaD,dualpredb);
-    std::cout<<"sigma D and pre "<<sigmaD<<" "<<dualpreda<<std::endl;
+    //    std::cout<<"sigma D and pre "<<sigmaD<<" "<<dualpreda<<std::endl;
     scintdual->Fill(sigmaS,sigmaD);
 
   }
