@@ -27,11 +27,11 @@ TRandom rrr;
 
 void DualReadoutToy() {
 
-  double h_s=0.8;
-  double h_c=0.3;
+  double h_s=0.9;
+  double h_c=0.5;
   double nscint=10000;
   double ncer=10000;
-  double fmean=0.5;
+  double fmean=0.6;
   double frms=0.2;
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
 
