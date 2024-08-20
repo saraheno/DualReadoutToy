@@ -64,7 +64,7 @@ void DualReadoutToy() {
   TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.1,1000,0.,0.1);
   int jmax=0;
 
-  int npts=20;
+  int npts=200;
   double range=min(fmean,1-fmean)/2.;
   for(int j=1;j<npts;j++) {
     double frestry=j*(range/npts);
