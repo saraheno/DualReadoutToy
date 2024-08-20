@@ -31,7 +31,7 @@ void DualReadoutToy() {
   double h_c=0.3;
   double nscint=10000;
   double ncer=10000;
-  double fmean=0.8;
+  double fmean=0.5;
   double frms=0.2;
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
 
