@@ -91,8 +91,8 @@ void DualReadoutToy() {
 
 
   TH2F *scintdual2 = new TH2F("scint2 res vs dual res","scintdual2", 1000,0.,0.1,1000,0.,0.1);
-  for(int j=1;j<20;j++) {
-    double nnn=50.*j;
+  for(int j=1;j<500;j++) {
+    double nnn=100.*j;
 
     dotoy(0,h_s,h_c,nnn,nnn,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
     scintdual2->Fill(sigmaS,sigmaD);
@@ -124,7 +124,7 @@ void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double f
   TH1F *sss = new TH1F("sss","shower scintillation",300,0.,2.0);
   TH1F *ccc = new TH1F("ccc","shower cherenkov",300,0.,2.0);
   TH2F *sscc = new TH2F("sscc","cheren versus scint", 1000,0.,2.0,1000,0.,2.0);
-  TH1F *ddd = new TH1F("ddd","dual readout",300,0.,2.0);
+  TH1F *ddd = new TH1F("ddd","dual readout",900,0.,2.0);
   TH1F *cov = new TH1F("cov","covariance",300,-2.,2.0);
   fff->Reset();
   sss->Reset();
