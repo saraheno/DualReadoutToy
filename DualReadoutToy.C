@@ -27,10 +27,10 @@ void DualReadoutToy() {
 
   double h_s=0.8;
   double h_c=0.3;
-  double nscint=1000;
-  double ncer=1000;
+  double nscint=10000;
+  double ncer=10000;
   double fmean=0.5;
-  double frms=0.5;
+  double frms=0.3;
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
 
   dotoy(1,h_s,h_c,nscint,ncer,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
@@ -55,9 +55,9 @@ void DualReadoutToy() {
 
   
   TH2F *covcheck = new TH2F("covcheck","covcheck", 1000,0.,0.02,1000,0.,0.02);
-  TH2F *dualcheck = new TH2F("dualcheck true","dualcheck", 1000,0.,0.4,1000,0.,0.4);
-  TH2F *dualcheckf = new TH2F("dualcheck formula","dualcheckf", 1000,0.,0.4,1000,0.,0.4);
-  TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.4,1000,0.,0.4);
+  TH2F *dualcheck = new TH2F("dualcheck true","dualcheck", 1000,0.,0.1,1000,0.,0.1);
+  TH2F *dualcheckf = new TH2F("dualcheck formula","dualcheckf", 1000,0.,0.1,1000,0.,0.1);
+  TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.1,1000,0.,0.1);
   for(int j=1;j<20;j++) {
     double frestry=(1/40.)*j;
     std::cout<<std::endl;
@@ -90,7 +90,7 @@ void DualReadoutToy() {
   SCEDraw1_2D_2(c10,"c10",scintdual,"junk10.png");
 
 
-  TH2F *scintdual2 = new TH2F("scint2 res vs dual res","scintdual2", 1000,0.,0.4,1000,0.,0.4);
+  TH2F *scintdual2 = new TH2F("scint2 res vs dual res","scintdual2", 1000,0.,0.1,1000,0.,0.1);
   for(int j=1;j<20;j++) {
     double nnn=50.*j;
 
@@ -100,6 +100,19 @@ void DualReadoutToy() {
   }
   TCanvas* c11;
   SCEDraw1_2D_2(c11,"c11",scintdual2,"junk11.png");
+
+
+
+  TH2F *scintdual3 = new TH2F("cer mean vs dual res","scintdual3", 1000,0.,1.0,1000,0.,0.1);
+  for(int j=1;j<10;j++) {
+    double fmeanaa=0.2+0.05*j;
+
+    dotoy(0,h_s,h_c,nscint,ncer,fmeanaa,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
+    scintdual3->Fill(cccm,sigmaD);
+
+  }
+  TCanvas* c12;
+  SCEDraw1_2D(c12,"c12",scintdual3,"junk12.png");
 
   
 }
@@ -208,7 +221,7 @@ void SCEDraw1 (TCanvas* canv,  const char* name,TH1F* h1, const char* outfile, b
 
 
   canv->Print(outfile,".png");
-  canv->Update();
+  //canv->Update();
 
   return;
 }
@@ -235,7 +248,7 @@ void SCEDraw1_2D (TCanvas* canv,  const char* name,TH2F* h1, const char* outfile
 
 
   canv->Print(outfile,".png");
-  canv->Update();
+  //canv->Update();
 
   return;
 }
@@ -262,11 +275,12 @@ void SCEDraw1_2D_2 (TCanvas* canv,  const char* name,TH2F* h1, const char* outfi
   TLine line = TLine(0.,0.,1.,1.);
   line.SetLineColor(kYellow);
   line.SetLineWidth(2);
-  line.Draw("same");
+  line.Draw();
 
 
-  canv->Print(outfile,".png");
+  canv->cd(0);
+  canv->Modified();
   canv->Update();
-
+canv->Print(outfile,".png");
   return;
 }
