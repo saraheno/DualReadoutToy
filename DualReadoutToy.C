@@ -58,10 +58,9 @@ void DualReadoutToy() {
   std::cout<<"chi is "<<chi<<std::endl;
   double dualpred3t1=sigmaS*sigmaS/(1-chi)/(1-chi);
   double dualpred3t2=chi*chi*sigmaC*sigmaC/(1-chi)/(1-chi);
-  //double dualpred3t3=-2*(1-h_c)*(1-h_c)*(1-h_s)*(1-h_s)*frms*frms/(h_s-h_c)/(h_s-h_c);
-  double dualpred3t3=-2*(1-h_s)*(1-h_c)*chi*frms*frms/(1-chi)/(1-chi);
-  //double dualpred3t3=-2*chi*chi*frms*frms/(1-chi)/(1-chi)/(1+chi*chi);
-  std::cout<<"dualpredt1,2,3 are "<<dualpred3t1<<" "<<dualpred3t2<<" "<<dualpred3t3<<std::endl;
+  //double dualpred3t3=-2*(1-h_s)*(1-h_c)*chi*frms*frms/(1-chi)/(1-chi);
+  double dualpred3t3=-2*(h_s-h_c)*(h_s-h_c)*chi*chi*frms*frms/(1-chi)/(1-chi)/(1-chi)/(1-chi);
+   std::cout<<"dualpredt1,2,3 are "<<dualpred3t1<<" "<<dualpred3t2<<" "<<dualpred3t3<<std::endl;
   std::cout<<" sum is "<<dualpred3t1+dualpred3t2+dualpred3t3<<std::endl;
   double dualpred3=dualpred3t1+dualpred3t2+dualpred3t3;
   if(dualpred3>0) dualpred3=sqrt(dualpred3);
