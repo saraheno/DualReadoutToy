@@ -32,7 +32,7 @@ void DualReadoutToy() {
   double nscint=10000;
   double ncer=10000;
   double fmean=0.6;
-  double frms=0.2;
+  double frms=0.1;
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
 
   dotoy(1,h_s,h_c,nscint,ncer,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
@@ -43,16 +43,30 @@ void DualReadoutToy() {
   double precov=(1-h_s)*(1-h_c)*frms*frms;
   //double precov=(1-h_s)*(1-h_c)*(frms*frms*fmean*fmean/(frms*frms+fmean*fmean));
   std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
-  double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
-  double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC;
+  double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS/(h_s-h_c)/(h_s-h_c);
+  double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC/(h_s-h_c)/(h_s-h_c);
   double sum12= term1+term2;
-  double term3_true= 2*(1-h_s)*(1-h_c)*acov;
-  double term3_formula= 2*(1-h_s)*(1-h_c)*precov;
+  double term3_true= -2*(1-h_s)*(1-h_c)*acov/(h_s-h_c)/(h_s-h_c);
+  double term3_formula= -2*(1-h_s)*(1-h_c)*precov/(h_s-h_c)/(h_s-h_c);
   std::cout<<"1 2 sum 3_true 3_for are "<<term1<<" "<<term2<<" "<<sum12<<" "<<term3_true<<" "<<term3_formula<<std::endl;
-
-  double dualpred = (1/(h_s-h_c))*sqrt(term1+term2-term3_true);
-  double dualpred2 = (1/(h_s-h_c))*sqrt(term1+term2-term3_formula);
+  double pred2i = term1+term2-term3_formula;
+  std::cout<<" pred2i is "<<pred2i<<std::endl;
+  
+  double dualpred = sqrt(term1+term2+term3_true);
+  double dualpred2 = sqrt(term1+term2+term3_formula);
+  double chi = (1-h_s)/(1-h_c);
+  std::cout<<"chi is "<<chi<<std::endl;
+  double dualpred3t1=sigmaS*sigmaS/(1-chi)/(1-chi);
+  double dualpred3t2=chi*chi*sigmaC*sigmaC/(1-chi)/(1-chi);
+  //double dualpred3t3=-2*(1-h_c)*(1-h_c)*(1-h_s)*(1-h_s)*frms*frms/(h_s-h_c)/(h_s-h_c);
+  double dualpred3t3=-2*(1-h_s)*(1-h_c)*chi*frms*frms/(1-chi)/(1-chi);
+  //double dualpred3t3=-2*chi*chi*frms*frms/(1-chi)/(1-chi)/(1+chi*chi);
+  std::cout<<"dualpredt1,2,3 are "<<dualpred3t1<<" "<<dualpred3t2<<" "<<dualpred3t3<<std::endl;
+  std::cout<<" sum is "<<dualpred3t1+dualpred3t2+dualpred3t3<<std::endl;
+  double dualpred3=dualpred3t1+dualpred3t2+dualpred3t3;
+  if(dualpred3>0) dualpred3=sqrt(dualpred3);
   std::cout<<"dual res is "<<sigmaD<<" predicted using true cov is  "<<dualpred<<" predicted using formula cov is "<<dualpred2<<std::endl;
+  std::cout<<" using chi formula is "<<dualpred3<<std::endl;
 
 
   
@@ -68,7 +82,7 @@ void DualReadoutToy() {
   double range=min(fmean,1-fmean)/2.;
   for(int j=1;j<npts;j++) {
     double frestry=j*(range/npts);
-    std::cout<<"frestry is "<<frestry<<std::endl;
+    //std::cout<<"frestry is "<<frestry<<std::endl;
     //    std::cout<<std::endl;
     dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
 
@@ -150,9 +164,9 @@ void DualReadoutToy() {
   SCEDraw1_2D(c12,"c12",scintdual3,"junk12.png");
 
   int ijunk=0;
-  std::cout<<"input an integer"<<std::endl;
-  std::cin>>ijunk;
-
+  //  std::cout<<"input an integer"<<std::endl;
+  //std::cin>>ijunk;
+  return;
   
 }
 
@@ -193,6 +207,7 @@ void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double f
     ccc->Fill(CCC);
     sscc->Fill(SSS,CCC);
 
+    // this is the estimated energy
     double DDD=((1-h_c)*SSS - (1-h_s)*CCC)/(h_s-h_c);
     ddd->Fill(DDD);
 
