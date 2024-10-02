@@ -17,9 +17,9 @@
 void SCEDraw1 (TCanvas* canv, const char* name, TH1F* h1, const char* outfile, bool logy);
 void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
 void SCEDraw1_2D_2 (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
-void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm,double &cccm,double &sigmaS, double &sigmaC, double &sigmaD, double &acov);
+void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm,double &cccm,double &sigmaS, double &sigmaC, double &sigmaD, double &acov, double &feffred);
 
-int nshowers=10000000;
+int nshowers=1000000;
 int npts=200;  // when varying fres
 
 TRandom rrr;
@@ -33,9 +33,9 @@ void DualReadoutToy() {
   double ncer=10000;
   double fmean=0.6;
   double frms=0.1;
-  double sssm,cccm,sigmaS,sigmaC,sigmaD,acov;
+  double sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres;
 
-  dotoy(1,h_s,h_c,nscint,ncer,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
+  dotoy(1,h_s,h_c,nscint,ncer,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
   std::cout<<"mean scint is "<<sssm<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
   std::cout<<"mean cer is "<<cccm<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
   std::cout<<"scint res is "<<sigmaS<<std::endl;
@@ -81,13 +81,15 @@ void DualReadoutToy() {
   double range=min(fmean,1-fmean)/2.;
   for(int j=1;j<npts;j++) {
     double frestry=j*(range/npts);
-    std::cout<<"frestry is "<<frestry<<std::endl;
+    //std::cout<<"frestry is "<<frestry<<std::endl;
     //    std::cout<<std::endl;
-    dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
+    dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
 
     //precov=(1-h_s)*(1-h_c)*(frestry*frestry*fmean*fmean/(frestry*frestry+fmean*fmean));
     covcheck->Fill(acov,precov);
-    precov=(1-h_s)*(1-h_c)*frestry*frestry; 
+    precov=(1-h_s)*(1-h_c)*frestry*frestry;
+    precov=(1-h_s)*(1-h_c)*feffres*feffres; 
+
     //    std::cout<<"cov is "<<acov<<" while predicted is "<<precov<<std::endl;
 
     term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
@@ -131,7 +133,7 @@ void DualReadoutToy() {
   for(int j=1;j<500;j++) {
     double nnn=100.*j;
 
-    dotoy(0,h_s,h_c,nnn,nnn,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
+    dotoy(0,h_s,h_c,nnn,nnn,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
     scintdual2->Fill(sigmaS,sigmaD);
 
     precov=(1-h_s)*(1-h_c)*(frms*frms*fmean*fmean/(frms*frms+fmean*fmean));
@@ -156,7 +158,7 @@ void DualReadoutToy() {
   for(int j=1;j<10;j++) {
     double fmeanaa=0.2+0.05*j;
 
-    dotoy(0,h_s,h_c,nscint,ncer,fmeanaa,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
+    dotoy(0,h_s,h_c,nscint,ncer,fmeanaa,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
     scintdual3->Fill(cccm,sigmaD);
 
   }
@@ -171,7 +173,7 @@ void DualReadoutToy() {
 }
 
 
-void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm, double& cccm, double &sigmaS, double &sigmaC, double &sigmaD, double &acov) {
+void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm, double& cccm, double &sigmaS, double &sigmaC, double &sigmaD, double &acov, double &feffres) {
 
   TH1F *fff = new TH1F("fff","shower em fraction",300,0.,2.0);
   TH1F *sss = new TH1F("sss","shower scintillation",300,0.,2.0);
@@ -221,6 +223,7 @@ void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double f
   sigmaD=ddd->GetRMS();
   sssm=sss->GetMean();
   cccm=ccc->GetMean();
+  feffres=fff->GetRMS();
   //  std::cout<<"sigma S C D "<<sigmaS<<" "<<sigmaC<<" "<<sigmaD<<std::endl;
 
   //double covmean = cov->GetMean();
