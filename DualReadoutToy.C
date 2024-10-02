@@ -19,8 +19,8 @@ void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile
 void SCEDraw1_2D_2 (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
 void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm,double &cccm,double &sigmaS, double &sigmaC, double &sigmaD, double &acov);
 
-int nshowers=100000;
-
+int nshowers=10000000;
+int npts=200;  // when varying fres
 
 TRandom rrr;
 
@@ -77,11 +77,11 @@ void DualReadoutToy() {
   TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.1,1000,0.,0.1);
   int jmax=0;
 
-  int npts=200;
+
   double range=min(fmean,1-fmean)/2.;
   for(int j=1;j<npts;j++) {
     double frestry=j*(range/npts);
-    //std::cout<<"frestry is "<<frestry<<std::endl;
+    std::cout<<"frestry is "<<frestry<<std::endl;
     //    std::cout<<std::endl;
     dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov);
 
@@ -97,6 +97,7 @@ void DualReadoutToy() {
 
     if(term3_formula>term1+term2) {
       std::cout<<"invalid prediction frestry="<<frestry<<std::endl;
+      std::cout<<" term1 term2 sum term3_formula difference"<<term1<<" "<<term2<<" "<<term1+term2<<" "<<term3_formula<<" "<<term1+term2-term3_formula<<std::endl;
       jmax=j-1;
     }
     if(jmax!=0) term3_formula= 2*(1-h_s)*(1-h_c)*(1-h_s)*(1-h_c)*(1./40.)*(1./40.)*jmax*jmax;
