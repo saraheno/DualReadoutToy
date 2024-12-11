@@ -70,11 +70,15 @@ void DualReadoutToy() {
 
   
   TH2F *covcheck = new TH2F("covcheck","covcheck", 1000,0.,0.02,1000,0.,0.02);
-  TH2F *covcheckf1 = new TH2F("true-pred vs f","covcheckf1", 1000,0.,0.6,1000,-0.01,0.05);
-  TH1F *dualcheck = new TH1F("dualcheck true","dualcheck", 1000,-0.05,0.05);
-  TH1F *dualcheckf = new TH1F("dualcheck formula","dualcheckf", 1000,-0.05,0.05);
-  TH1F *dualcheckab = new TH1F("dualcheck formulaab","dualcheckab", 1000,-0.05,0.05);
-  TH2F *scintdual = new TH2F("scint res vs dual res","scintdual", 1000,0.,0.1,1000,0.,0.1);
+  TH2F *covcheckf1 = new TH2F("covcheckf1","true-pred vs f", 1000,0.,0.6,1000,-0.01,0.05);
+  TH1F *dualcheck = new TH1F("dualcheck","dualcheck true", 1000,-0.05,0.05);
+  TH1F *dualcheckf = new TH1F("dualcheckf","dualcheck formula", 1000,-0.05,0.05);
+  TH1F *dualcheckab = new TH1F("dualcheckab","dualcheck formulaab", 1000,-0.05,0.05);
+  TH2F *scintdual = new TH2F("scintdual","scint res vs dual res", 1000,0.,0.1,1000,0.,0.1);
+  TH2F *scintdual2 = new TH2F("scintdual2","scintdual2", 1000,0.,0.1,1000,0.,0.1);
+  TH2F *scintdual3 = new TH2F("cer mean vs dual res","scintdual3", 1000,0.,1.0,1000,0.,0.1);
+  TH2F *scintdual4 = new TH2F("scintdual4","Dual/Scint Res versus %noise", 1000,0.,0.1,1000,0.,1.5);
+  TH2F *dualcheckha = new TH2F("dual true v p ha","dualcheckha", 1000,0.,0.1,1000,0.,0.1);
   int jmax=0;
 
 
@@ -128,13 +132,14 @@ void DualReadoutToy() {
   SCEDraw1_2D_2(c10,"c10",scintdual,"junk10.png");
 
 
-  TH2F *scintdual2 = new TH2F("scint2 res vs dual res","scintdual2", 1000,0.,0.1,1000,0.,0.1);
-  TH2F *dualcheckha = new TH2F("dual true v p ha","dualcheckha", 1000,0.,0.1,1000,0.,0.1);
+
+
   for(int j=1;j<500;j++) {
     double nnn=100.*j;
 
     dotoy(0,h_s,h_c,nnn,nnn,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
     scintdual2->Fill(sigmaS,sigmaD);
+    if(sigmaS>0) scintdual4->Fill(1/sqrt(nnn),sigmaD/sigmaS);
 
     precov=(1-h_s)*(1-h_c)*(frms*frms*fmean*fmean/(frms*frms+fmean*fmean));
     term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS;
@@ -149,12 +154,14 @@ void DualReadoutToy() {
   std::cout<<"last dualres is "<<sigmaD<<std::endl;
   TCanvas* c11;
   SCEDraw1_2D_2(c11,"c11",scintdual2,"junk11.png");
+  TCanvas* c11b;
+  SCEDraw1_2D_2(c11b,"c11b",scintdual4,"junk11b.png");
   TCanvas* c11a;
   SCEDraw1_2D_2(c11a,"c11a",dualcheckha,"junk11a.png");
 
 
 
-  TH2F *scintdual3 = new TH2F("cer mean vs dual res","scintdual3", 1000,0.,1.0,1000,0.,0.1);
+
   for(int j=1;j<10;j++) {
     double fmeanaa=0.2+0.05*j;
 
