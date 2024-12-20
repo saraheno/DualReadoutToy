@@ -30,8 +30,8 @@ void DualReadoutToy() {
 
   double h_s=0.9;
   double h_c=0.6;
-  double nscint=10000;
-  double ncer=10000;
+  double nscint=100000;
+  double ncer=100000;
   double fmean=0.6;
   double frms=0.1;
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres;
@@ -92,7 +92,7 @@ void DualReadoutToy() {
 
   
   TH2F *covcheck = new TH2F("covcheck","covcheck", 1000,0.,0.02,1000,0.,0.02);
-  TH2F *covcheckf1 = new TH2F("covcheckf1","true-pred vs f", 1000,0.,0.6,1000,-0.01,0.05);
+  TH2F *covcheckf1 = new TH2F("covcheckf1","true-pred vs f", 1000,0.,0.6,1000,-0.01,0.01);
   TH1F *dualcheck = new TH1F("dualcheck","dualcheck true", 1000,-0.05,0.05);
   TH1F *dualcheckf = new TH1F("dualcheckf","dualcheck formula", 1000,-0.05,0.05);
   TH1F *dualcheckab = new TH1F("dualcheckab","dualcheck formulaab", 1000,-0.05,0.05);
@@ -100,6 +100,7 @@ void DualReadoutToy() {
   TH2F *scintdual2 = new TH2F("scintdual2","scintdual2", 1000,0.,0.1,1000,0.,0.1);
   TH2F *scintdual3 = new TH2F("cer mean vs dual res","scintdual3", 1000,0.,1.0,1000,0.,0.1);
   TH2F *scintdual4 = new TH2F("scintdual4","Dual/Scint Res versus %noise", 1000,0.,0.1,1000,0.,1.5);
+  TH2F *scintdual5 = new TH2F("scintdual5","sigma diff versus f", 100,0.,1.,100,-1,1);
   TH2F *dualcheckha = new TH2F("dual true v p ha","dualcheckha", 1000,0.,0.1,1000,0.,0.1);
   int jmax=0;
 
@@ -136,7 +137,7 @@ void DualReadoutToy() {
     dualcheckab->Fill(dualpreda-dualpredb);
     //    std::cout<<"sigma D and pre "<<sigmaD<<" "<<dualpreda<<std::endl;
     scintdual->Fill(sigmaS,sigmaD);
-    covcheckf1->Fill(frestry,sigmaD-dualpredb);
+    if(sigmaD>0) covcheckf1->Fill(frestry,(sigmaD-dualpredb)/sigmaD);
   }
   std::cout<<"ult cov is "<<acov<<std::endl;
 
@@ -198,10 +199,27 @@ void DualReadoutToy() {
     dotoy(0,h_s,h_c,nscint,ncer,fmeanaa,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres,fff,sss,ccc,sscc,ddd,cov);
     scintdual3->Fill(cccm,sigmaD);
 
+
+    double term1= (1-h_c)*(1-h_c)*sigmaS*sigmaS/(h_s-h_c)/(h_s-h_c);
+    double term2=(1-h_s)*(1-h_s)*sigmaC*sigmaC/(h_s-h_c)/(h_s-h_c);
+    double sum12= term1+term2;
+    double term3_true= -2*(1-h_s)*(1-h_c)*acov/(h_s-h_c)/(h_s-h_c);
+    double term3_formula= -2*(1-h_s)*(1-h_c)*precov/(h_s-h_c)/(h_s-h_c);
+    double pred=term1+term2+term3_true;
+    std::cout<<"terms "<<term1<<" "<<term2<<" "<<term3_true<<std::endl;
+
+
+    std::cout<<"junk  "<<fmeanaa<<" "<<pred<<" "<<sigmaD<<" "<<pred-sigmaD<<" "<<sigmaD <<std::endl;
+    if(sigmaD>0) std::cout<<fmeanaa<<" "<<(pred-sigmaD)/sigmaD<<std::endl;
+    if(sigmaD>0) scintdual5->Fill(fmeanaa,(pred-sigmaD)/sigmaD);
+
   }
   TCanvas* c12;
   SCEDraw1_2D(c12,"c12",scintdual3,"junk12.png");
+  TCanvas* c1333;
+  SCEDraw1_2D(c1333,"c1333",scintdual5,"junk1333.png");
   scintdual3->Write();
+  scintdual5->Write();
 
   
   int ijunk=0;
