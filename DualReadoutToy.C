@@ -17,7 +17,8 @@
 void SCEDraw1 (TCanvas* canv, const char* name, TH1F* h1, const char* outfile, bool logy);
 void SCEDraw1_2D (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
 void SCEDraw1_2D_2 (TCanvas* canv, const char* name, TH2F* h1, const char* outfile);
-void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm,double &cccm,double &sigmaS, double &sigmaC, double &sigmaD, double &acov, double &feffred);
+void dotoy(bool doplot,double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm,double &cccm,double &sigmaS, double &sigmaC, double &sigmaD, double &acov, double &feffred,
+	   	   TH1F* fff, TH1F* sss, TH1F* ccc, TH2F* sscc, TH1F* ddd, TH1F*cov);
 
 int nshowers=1000000;
 int npts=200;  // when varying fres
@@ -35,7 +36,28 @@ void DualReadoutToy() {
   double frms=0.1;
   double sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres;
 
-  dotoy(1,h_s,h_c,nscint,ncer,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
+
+
+  TH1F *fff = new TH1F("fff","shower em fraction",300,0.,2.0);
+  TH1F *sss = new TH1F("sss","shower scintillation",300,0.,2.0);
+  TH1F *ccc = new TH1F("ccc","shower cherenkov",300,0.,2.0);
+  TH2F *sscc = new TH2F("sscc","cheren versus scint", 1000,0.,2.0,1000,0.,2.0);
+  TH1F *ddd = new TH1F("ddd","dual readout",900,0.,2.0);
+  TH1F *cov = new TH1F("cov","covariance",3000,-2.,2.0);
+
+  
+
+  TFile * outss = new TFile("hists.root","RECREATE");
+
+
+  
+  dotoy(1,h_s,h_c,nscint,ncer,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres,fff,sss,ccc,sscc,ddd,cov);
+  fff->Write();
+  sss->Write();
+  ccc->Write();
+  sscc->Write();
+  ddd->Write();
+  cov->Write();
   std::cout<<"mean scint is "<<sssm<<" while predicted is "<<(fmean+(1-fmean)*h_s)<<std::endl;
   std::cout<<"mean cer is "<<cccm<<" while predicted is "<<(fmean+(1-fmean)*h_c)<<std::endl;
   std::cout<<"scint res is "<<sigmaS<<std::endl;
@@ -87,7 +109,7 @@ void DualReadoutToy() {
     double frestry=j*(range/npts);
     //std::cout<<"frestry is "<<frestry<<std::endl;
     //    std::cout<<std::endl;
-    dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
+    dotoy(0,h_s,h_c,nscint,ncer,fmean,frestry,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres,fff,sss,ccc,sscc,ddd,cov);
 
     //precov=(1-h_s)*(1-h_c)*(frestry*frestry*fmean*fmean/(frestry*frestry+fmean*fmean));
     covcheck->Fill(acov,precov);
@@ -131,13 +153,19 @@ void DualReadoutToy() {
   TCanvas* c10;
   SCEDraw1_2D_2(c10,"c10",scintdual,"junk10.png");
 
+  covcheck->Write();
+  covcheckf1->Write();
+  dualcheck->Write();
+  dualcheckf->Write();
+  dualcheckab->Write();
+  scintdual->Write();
 
 
-
+  
   for(int j=1;j<500;j++) {
     double nnn=100.*j;
 
-    dotoy(0,h_s,h_c,nnn,nnn,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
+    dotoy(0,h_s,h_c,nnn,nnn,fmean,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres,fff,sss,ccc,sscc,ddd,cov);
     scintdual2->Fill(sigmaS,sigmaD);
     if(sigmaS>0) scintdual4->Fill(1/sqrt(nnn),sigmaD/sigmaS);
 
@@ -159,35 +187,47 @@ void DualReadoutToy() {
   TCanvas* c11a;
   SCEDraw1_2D_2(c11a,"c11a",dualcheckha,"junk11a.png");
 
-
+  scintdual2->Write();
+  scintdual4->Write();
+  dualcheckha->Write();
 
 
   for(int j=1;j<10;j++) {
     double fmeanaa=0.2+0.05*j;
 
-    dotoy(0,h_s,h_c,nscint,ncer,fmeanaa,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres);
+    dotoy(0,h_s,h_c,nscint,ncer,fmeanaa,frms,sssm,cccm,sigmaS,sigmaC,sigmaD,acov,feffres,fff,sss,ccc,sscc,ddd,cov);
     scintdual3->Fill(cccm,sigmaD);
 
   }
   TCanvas* c12;
   SCEDraw1_2D(c12,"c12",scintdual3,"junk12.png");
+  scintdual3->Write();
 
+  
   int ijunk=0;
   //  std::cout<<"input an integer"<<std::endl;
   //std::cin>>ijunk;
+
+
+  outss->Close();
+
+
   return;
   
 }
 
 
-void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm, double& cccm, double &sigmaS, double &sigmaC, double &sigmaD, double &acov, double &feffres) {
-
+void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double fmean,double frms, double &sssm, double& cccm, double &sigmaS, double &sigmaC, double &sigmaD, double &acov, double &feffres,
+	   TH1F* fff, TH1F* sss, TH1F* ccc, TH2F* sscc, TH1F* ddd, TH1F*cov
+	   ) {
+  /*
   TH1F *fff = new TH1F("fff","shower em fraction",300,0.,2.0);
   TH1F *sss = new TH1F("sss","shower scintillation",300,0.,2.0);
   TH1F *ccc = new TH1F("ccc","shower cherenkov",300,0.,2.0);
   TH2F *sscc = new TH2F("sscc","cheren versus scint", 1000,0.,2.0,1000,0.,2.0);
   TH1F *ddd = new TH1F("ddd","dual readout",900,0.,2.0);
   TH1F *cov = new TH1F("cov","covariance",3000,-2.,2.0);
+  */
   fff->Reset();
   sss->Reset();
   ccc->Reset();
@@ -252,12 +292,10 @@ void dotoy(bool doplot, double h_s,double h_c,double nscint,double ncer,double f
     SCEDraw1(c6,"c6",cov,"junk6.png",0);
   }
 
-  delete fff;
-  delete sss;
-  delete ccc;
-  delete sscc;
-  delete ddd;
-  delete cov;
+
+
+
+  
 
   return;
 }
@@ -286,6 +324,10 @@ void SCEDraw1 (TCanvas* canv,  const char* name,TH1F* h1, const char* outfile, b
 
   canv->Print(outfile,".png");
   //canv->Update();
+
+
+
+
 
   return;
 }
